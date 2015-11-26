@@ -8,8 +8,8 @@ import android.net.Uri;
 import android.os.Build;
 import android.support.v4.app.NotificationCompat;
 
-import org.digitalcampus.mobile.learning.R;
 import org.digitalcampus.oppia.application.MobileLearning;
+import org.instrat.oppia.R;
 
 public class OppiaNotificationBuilder {
 
@@ -25,7 +25,7 @@ public class OppiaNotificationBuilder {
             int color;
             //We have to check the M version for the deprecation of the method getColor()
             if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
-                color = ctx.getResources().getColor(R.color.highlight_light, null);
+                color = ctx.getResources().getColor(R.color.highlight_light);
             }
             else{
                 color = ctx.getResources().getColor(R.color.highlight_light);

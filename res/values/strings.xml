@@ -21,11 +21,11 @@
     <string name="menu_search">Search</string>
     <string name="menu_stop_read_aloud">Stop reading</string>
     
-    <string name="service_tracker">OppiaMobile Tracker Service</string>
+    <string name="service_tracker">OSPHCB Tracker Service</string>
     
-    <string name="fragment_welcome_title">Welcome to OppiaMobile</string>
-    <string name="fragment_welcome_desc">OppiaMobile is a mobile learning platform for delivering learning content, video and quizzes.\n\n\'Oppia\' means \'to learn\' in Finnish</string>
-    <string name="fragment_welcome_login_info">To get started with OppiaMobile, you will need to register or login.</string>
+    <string name="fragment_welcome_title">Welcome to OSPHCB Training</string>
+    <string name="fragment_welcome_desc">OSPHCB Training is a mobile learning platform for delivering learning content, video and quizzes.\n\n\'Oppia\' means \'to learn\' in Finnish</string>
+    <string name="fragment_welcome_login_info">To get started with OSPHCB Training, you will need to register or login.</string>
     <string name="fragment_welcome_privacy">We take your privacy seriously, <a href="http://digital-campus.org/privacy/">find out more about Digital Campus\'s privacy policy</a></string>
     
     <string name="tab_title_about">About</string>
@@ -278,7 +278,7 @@
     <string name="admin_password_required">This feature is protected for admin use only. Please, insert below the admin password to continue:</string>
     <string name="admin_password_error_incorrect_password">Incorrect admin password. Try again</string>
     <string name="admin_password_newpassword_dialog_title">Admin password</string>
-    <string name="admin_password_newpassword_dialog_message">Please, introduce your admin password</string>
+    <string name="admin_password_newpassword_dialog_message">Please, enter your admin password</string>
     <string name="prefAdminProtection">Protect admin actions with password</string>
     <string name="prefAdminPassword">Change admin password</string>
 

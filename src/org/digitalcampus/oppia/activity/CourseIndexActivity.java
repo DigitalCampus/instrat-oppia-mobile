@@ -24,6 +24,7 @@ import java.util.concurrent.Callable;
 
 import org.instrat.oppia.R;
 import org.digitalcampus.oppia.adapter.SectionListAdapter;
+import org.digitalcampus.oppia.application.MobileLearning;
 import org.digitalcampus.oppia.exception.InvalidXMLException;
 import org.digitalcampus.oppia.model.Activity;
 import org.digitalcampus.oppia.model.Course;
@@ -122,7 +123,7 @@ public class CourseIndexActivity extends AppActivity implements OnSharedPreferen
 		// set image
 		if (course.getImageFile() != null) {
 			BitmapDrawable bm = ImageUtils.LoadBMPsdcard(course.getImageFileFromRoot(), this.getResources(),
-					R.drawable.dc_logo);
+					MobileLearning.APP_LOGO);
 			getActionBar().setIcon(bm);
 		}
 	}

@@ -22,6 +22,7 @@ import java.util.List;
 
 import org.instrat.oppia.R;
 import org.digitalcampus.oppia.adapter.ActivityPagerAdapter;
+import org.digitalcampus.oppia.application.MobileLearning;
 import org.digitalcampus.oppia.fragments.BadgesFragment;
 import org.digitalcampus.oppia.fragments.PointsFragment;
 import org.digitalcampus.oppia.fragments.ScorecardFragment;
@@ -90,7 +91,7 @@ public class ScorecardActivity extends FragmentActivity implements ActionBar.Tab
 			fScorecard = ScorecardFragment.newInstance(course);
             if (course.getImageFile() != null) {
                 BitmapDrawable bm = ImageUtils.LoadBMPsdcard(course.getImageFileFromRoot(), this.getResources(),
-                        R.drawable.dc_logo);
+                		MobileLearning.APP_LOGO);
                 actionBar.setIcon(bm);
             }
 		} else {
