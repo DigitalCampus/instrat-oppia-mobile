@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">OSPHCB Training</string>
+    <string name="app_name">OSPHCDB Training</string>
     <string name="prefServerDefault">http://instrat.oppia-mobile.org/</string>
     <string name="prefServerTimeoutConnectionDefault">60000</string>
     <string name="prefServerTimeoutResponseDefault">60000</string>

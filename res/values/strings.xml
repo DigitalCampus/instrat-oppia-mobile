@@ -21,11 +21,11 @@
     <string name="menu_search">Search</string>
     <string name="menu_stop_read_aloud">Stop reading</string>
     
-    <string name="service_tracker">OSPHCB Tracker Service</string>
+    <string name="service_tracker">OSPHCDB Tracker Service</string>
     
-    <string name="fragment_welcome_title">Welcome to OSPHCB Training</string>
-    <string name="fragment_welcome_desc">OSPHCB Training is a mobile learning platform for delivering learning content, video and quizzes.\n\n\'Oppia\' means \'to learn\' in Finnish</string>
-    <string name="fragment_welcome_login_info">To get started with OSPHCB Training, you will need to register or login.</string>
+    <string name="fragment_welcome_title">Welcome to OSPHCDB Training</string>
+    <string name="fragment_welcome_desc">OSPHCDB Training is a mobile learning platform for delivering learning content, video and quizzes.\n\n\'Oppia\' means \'to learn\' in Finnish</string>
+    <string name="fragment_welcome_login_info">To get started with OSPHCDB Training, you will need to register or login.</string>
     <string name="fragment_welcome_privacy">We take your privacy seriously, <a href="http://digital-campus.org/privacy/">find out more about Digital Campus\'s privacy policy</a></string>
     
     <string name="tab_title_about">About</string>
