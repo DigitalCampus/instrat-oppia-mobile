@@ -56,9 +56,10 @@ public class DbHelper extends SQLiteOpenHelper {
 
 	static final String TAG = DbHelper.class.getSimpleName();
 	static final String DB_NAME = "mobilelearning.db";
-	static final int DB_VERSION = 23;
+	static final int DB_VERSION = 24;
 
-	private static SQLiteDatabase db;
+    private static DbHelper instance;
+	private SQLiteDatabase db;
 	private SharedPreferences prefs;
 	
 	private static final String COURSE_TABLE = "Module";
@@ -72,6 +73,7 @@ public class DbHelper extends SQLiteOpenHelper {
 	private static final String COURSE_C_IMAGE = "imagelink";
 	private static final String COURSE_C_LANGS = "langs";
 	private static final String COURSE_C_ORDER_PRIORITY = "orderpriority";
+    private static final String COURSE_C_SEQUENCING = "sequencing";
 	
 	private static final String ACTIVITY_TABLE = "Activity";
 	private static final String ACTIVITY_C_ID = BaseColumns._ID;
@@ -106,8 +108,7 @@ public class DbHelper extends SQLiteOpenHelper {
 	private static final String QUIZATTEMPTS_C_MAXSCORE = "maxscore";
 	private static final String QUIZATTEMPTS_C_PASSED = "passed";
 	private static final String QUIZATTEMPTS_C_ACTIVITY_DIGEST = "actdigest";
-	
-	
+
 	private static final String SEARCH_TABLE = "search";
 	private static final String SEARCH_C_TEXT = "fulltext";
 	private static final String SEARCH_C_COURSETITLE = "coursetitle";
@@ -130,24 +131,20 @@ public class DbHelper extends SQLiteOpenHelper {
     private static final String USER_PREFS_C_USERNAME = "username";
     private static final String USER_PREFS_C_PREFKEY = "preference";
     private static final String USER_PREFS_C_PREFVALUE = "value";
-	
-    public void beginTransaction(){
-        db.beginTransaction();
-    }
-    public void endTransaction(boolean success){
-        if (success){
-            db.setTransactionSuccessful();
-        }
-        db.endTransaction();
-    }
 
 	// Constructor
-	public DbHelper(Context ctx) { //
+	private DbHelper(Context ctx) { //
 		super(ctx, DB_NAME, null, DB_VERSION);
 		prefs = PreferenceManager.getDefaultSharedPreferences(ctx);
-		DatabaseManager.initializeInstance(this);
-		db = DatabaseManager.getInstance().openDatabase();
+        db = this.getWritableDatabase();
 	}
+
+    public static synchronized DbHelper getInstance(Context ctx){
+        if (instance == null){
+            instance = new DbHelper(ctx.getApplicationContext());
+        }
+        return instance;
+    }
 
 	@Override
 	public void onCreate(SQLiteDatabase db) {
@@ -160,6 +157,16 @@ public class DbHelper extends SQLiteOpenHelper {
         createUserPrefsTable(db);
 	}
 
+    public void beginTransaction(){
+        db.beginTransaction();
+    }
+    public void endTransaction(boolean success){
+        if (success){
+            db.setTransactionSuccessful();
+        }
+        db.endTransaction();
+    }
+
 	public void createCourseTable(SQLiteDatabase db){
 		String m_sql = "create table " + COURSE_TABLE + " (" + COURSE_C_ID + " integer primary key autoincrement, "
 				+ COURSE_C_VERSIONID + " int, " + COURSE_C_TITLE + " text, " + COURSE_C_LOCATION + " text, "
@@ -167,7 +174,8 @@ public class DbHelper extends SQLiteOpenHelper {
 				+ COURSE_C_IMAGE + " text,"
 				+ COURSE_C_DESC + " text,"
 				+ COURSE_C_ORDER_PRIORITY + " integer default 0, " 
-				+ COURSE_C_LANGS + " text)";
+				+ COURSE_C_LANGS + " text, "
+                + COURSE_C_SEQUENCING + " text default '" + Course.SEQUENCING_MODE_NONE + "' )";
 		db.execSQL(m_sql);
 	}
 	
@@ -395,6 +403,12 @@ public class DbHelper extends SQLiteOpenHelper {
             db.execSQL("drop table if exists " + USER_PREFS_TABLE);
             createUserPrefsTable(db);
         }
+
+        if(oldVersion <= 23 && newVersion >= 24){
+            // add field "sequencingMode" to Course table
+            String sql1 = "ALTER TABLE " + COURSE_TABLE + " ADD COLUMN " + COURSE_C_SEQUENCING + " text default '"+Course.SEQUENCING_MODE_NONE+"';";
+            db.execSQL(sql1);
+        }
 	}
 
 	public void updateV43(long userId){
@@ -423,6 +437,7 @@ public class DbHelper extends SQLiteOpenHelper {
 		values.put(COURSE_C_IMAGE, course.getImageFile());
 		values.put(COURSE_C_DESC, course.getDescriptionJSONString());
 		values.put(COURSE_C_ORDER_PRIORITY, course.getPriority());
+        values.put(COURSE_C_SEQUENCING, course.getSequencingMode());
 		
 		if (!this.isInstalled(course.getShortname())) {
 			Log.v(TAG, "Record added");
@@ -574,6 +589,7 @@ public class DbHelper extends SQLiteOpenHelper {
 			course.setLangsFromJSONString(c.getString(c.getColumnIndex(COURSE_C_LANGS)));
 			course.setShortname(c.getString(c.getColumnIndex(COURSE_C_SHORTNAME)));
 			course.setPriority(c.getInt(c.getColumnIndex(COURSE_C_ORDER_PRIORITY)));
+            course.setSequencingMode(c.getString(c.getColumnIndex(COURSE_C_SEQUENCING)));
 			courses.add(course);
 			c.moveToNext();
 		}
@@ -619,7 +635,8 @@ public class DbHelper extends SQLiteOpenHelper {
 			course.setShortname(c.getString(c.getColumnIndex(COURSE_C_SHORTNAME)));
 			course.setPriority(c.getInt(c.getColumnIndex(COURSE_C_ORDER_PRIORITY)));
 			course.setDescriptionsFromJSONString(c.getString(c.getColumnIndex(COURSE_C_DESC)));
-			course = this.courseSetProgress(course, userId);
+            course.setSequencingMode(c.getString(c.getColumnIndex(COURSE_C_SEQUENCING)));
+            course = this.courseSetProgress(course, userId);
 			courses.add(course);
 			c.moveToNext();
 		}
@@ -636,13 +653,14 @@ public class DbHelper extends SQLiteOpenHelper {
 		while (c.isAfterLast() == false) {
 			course = new Course(prefs.getString(PrefsActivity.PREF_STORAGE_LOCATION, ""));
 			course.setCourseId(c.getInt(c.getColumnIndex(COURSE_C_ID)));
-			course.setVersionId(c.getDouble(c.getColumnIndex(COURSE_C_VERSIONID)));
-			course.setTitlesFromJSONString(c.getString(c.getColumnIndex(COURSE_C_TITLE)));
+            course.setVersionId(c.getDouble(c.getColumnIndex(COURSE_C_VERSIONID)));
+            course.setTitlesFromJSONString(c.getString(c.getColumnIndex(COURSE_C_TITLE)));
 			course.setImageFile(c.getString(c.getColumnIndex(COURSE_C_IMAGE)));
-			course.setLangsFromJSONString(c.getString(c.getColumnIndex(COURSE_C_LANGS)));
-			course.setShortname(c.getString(c.getColumnIndex(COURSE_C_SHORTNAME)));
-			course.setPriority(c.getInt(c.getColumnIndex(COURSE_C_ORDER_PRIORITY)));
-			course.setDescriptionsFromJSONString(c.getString(c.getColumnIndex(COURSE_C_DESC)));
+            course.setLangsFromJSONString(c.getString(c.getColumnIndex(COURSE_C_LANGS)));
+            course.setShortname(c.getString(c.getColumnIndex(COURSE_C_SHORTNAME)));
+            course.setPriority(c.getInt(c.getColumnIndex(COURSE_C_ORDER_PRIORITY)));
+            course.setDescriptionsFromJSONString(c.getString(c.getColumnIndex(COURSE_C_DESC)));
+            course.setSequencingMode(c.getString(c.getColumnIndex(COURSE_C_SEQUENCING)));
 			course = this.courseSetProgress(course, userId);
 			c.moveToNext();
 		}

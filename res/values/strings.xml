@@ -2,10 +2,13 @@
 <resources>
     <string name="app_logo_alt">Digital Campus Logo</string>
     
+    
+    <string name="gcm_defaultSenderId">1:1075863350964:android:e457f5046c8376a5</string>
+    <!-- string name="gcm_defaultSenderId">admin-api-cc4ba</string -->
+    
     <string name="about_logged_in">Logged in as: %1$s</string>
     <string name="about_not_logged_in">Not logged in</string>
-    
-    
+
     <string name="menu_download">Download Courses</string>
     <string name="menu_language">Change language</string>
     <string name="menu_settings">Settings</string>
@@ -196,6 +199,7 @@
     <string name="course_deleting">Deleting course…</string>
     <string name="course_deleting_success">Course deleted successfully</string>
     <string name="course_deleting_error">Error deleting course</string>
+    <string name="info.startup.preloaded_accounts">Preloaded %1$d new user(s).</string>
 	
 	<string name="loading_courses">Loading courses</string>
 	<string name="loading_points">Loading points &#8230;</string>
@@ -229,6 +233,7 @@
 	<string name="error_register_username_spaces">Your username cannot contain spaces</string>
 	<string name="error_resource_app_not_found">You don\'t seem to have an app installed to open \'%1$s\'. Please install an app capable of opening this type of file.</string>
 	<string name="error_resource_not_found">File: \'%1$s\' not found.</string>
+    <string name="error_preloading_accounts">Error preloading accounts from CSV file</string>
 
     <string name="error_insufficient_storage_available">Insufficient storage available</string>
 	<string name="error_sdcard">Your SD card is not available - please restart this app when the SD card is available.\nThe app will now close.</string>
@@ -292,6 +297,15 @@
     <string name="admin_password_newpassword_dialog_message">Please, enter your admin password</string>
     <string name="prefAdminProtection">Protect admin actions with password</string>
     <string name="prefAdminPassword">Change admin password</string>
+    <string name="prefRemoteAdminEnabled">Enable remote administration of the device</string>
+
+    <string name="notification.remote_admin.title">Oppia Remote Administration</string>
+    <string name="notification.remote_admin.camera_disabled">The device cameras have been disabled remotely</string>
+    <string name="notification.remote_admin.camera_enabled">The device cameras have been enabled remotely</string>
+
+    <string name="sequencing.dialog_title">Activity locked</string>
+    <string name="sequencing.section.message">You must complete the previous activities in this section before this one becomes available to you.</string>
+    <string name="sequencing.course.message">You must complete all the previous activities in the course before this one becomes available to you.</string>
 
 </resources>
 

@@ -17,27 +17,24 @@
 
 package org.digitalcampus.oppia.fragments;
 
+
 import java.util.ArrayList;
 
-import org.instrat.oppia.R;
 import org.digitalcampus.oppia.activity.CourseIndexActivity;
 import org.digitalcampus.oppia.adapter.CourseQuizzesGridAdapter;
-import org.digitalcampus.oppia.adapter.ScorecardListAdapter;
-import org.digitalcampus.oppia.application.DatabaseManager;
 import org.digitalcampus.oppia.application.DbHelper;
 import org.digitalcampus.oppia.application.SessionManager;
 import org.digitalcampus.oppia.model.Activity;
 import org.digitalcampus.oppia.model.Course;
 import org.digitalcampus.oppia.model.QuizStats;
 import org.digitalcampus.oppia.task.ParseCourseXMLTask;
-import org.digitalcampus.oppia.utils.ui.ScorecardPieChart;
 import org.digitalcampus.oppia.utils.ui.ProgressBarAnimator;
+import org.digitalcampus.oppia.utils.ui.ScorecardPieChart;
 import org.digitalcampus.oppia.utils.xmlreaders.CourseXMLReader;
+import org.instrat.oppia.R;
 
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -46,7 +43,6 @@ import android.view.animation.AlphaAnimation;
 import android.widget.AdapterView;
 import android.widget.GridView;
 import android.widget.LinearLayout.LayoutParams;
-
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
@@ -97,10 +93,9 @@ public class CourseScorecardFragment extends Fragment implements ParseCourseXMLT
         LayoutParams lp = new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
         vv.setLayoutParams(lp);
         // refresh course to get most recent info (otherwise gets the info from when course first opened)
-        DbHelper db = new DbHelper(super.getActivity());
+        DbHelper db = DbHelper.getInstance(super.getActivity());
         long userId = db.getUserId(SessionManager.getUsername(getActivity()));
         this.course = db.getCourse(this.course.getCourseId(), userId);
-        DatabaseManager.getInstance().closeDatabase();
 
         quizzesGrid = (GridView) vv.findViewById(R.id.scorecard_grid_quizzes);
         scorecardPieChart = (PieChart) vv.findViewById(R.id.scorecard_pie_chart);
@@ -142,7 +137,7 @@ public class CourseScorecardFragment extends Fragment implements ParseCourseXMLT
 
         ArrayList<Activity> baseline = parsed.getBaselineActivities();
         
-    	DbHelper db = new DbHelper(super.getActivity());
+    	DbHelper db = DbHelper.getInstance(super.getActivity());
         long userId = db.getUserId(SessionManager.getUsername(getActivity()));
         ArrayList<Activity> quizActs = db.getCourseQuizzes(course.getCourseId());
         ArrayList<QuizStats> quizzes = new ArrayList<QuizStats>();
@@ -169,7 +164,6 @@ public class CourseScorecardFragment extends Fragment implements ParseCourseXMLT
             QuizStats pretest = db.getQuizAttempt(baselineAct.getDigest(), userId);
             pretestScore = pretest.getPercent();
         }
-        DatabaseManager.getInstance().closeDatabase();
         
         quizStats.clear();
         quizStats.addAll(quizzes);

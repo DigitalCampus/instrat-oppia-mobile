@@ -31,26 +31,29 @@ import android.widget.Toast;
 import com.splunk.mint.Mint;
 
 import org.instrat.oppia.R;
-import org.digitalcampus.oppia.application.DatabaseManager;
 import org.digitalcampus.oppia.application.DbHelper;
 
 import org.digitalcampus.oppia.application.MobileLearning;
 import org.digitalcampus.oppia.application.SessionManager;
 import org.digitalcampus.oppia.listener.InstallCourseListener;
 import org.digitalcampus.oppia.listener.PostInstallListener;
+import org.digitalcampus.oppia.listener.PreloadAccountsListener;
 import org.digitalcampus.oppia.listener.StorageAccessListener;
 import org.digitalcampus.oppia.listener.UpgradeListener;
 import org.digitalcampus.oppia.model.DownloadProgress;
+import org.digitalcampus.oppia.service.GCMRegistrationService;
 import org.digitalcampus.oppia.task.InstallDownloadedCoursesTask;
 import org.digitalcampus.oppia.task.Payload;
 import org.digitalcampus.oppia.task.PostInstallTask;
 import org.digitalcampus.oppia.task.UpgradeManagerTask;
+import org.digitalcampus.oppia.utils.GooglePlayUtils;
+import org.digitalcampus.oppia.utils.UIUtils;
 import org.digitalcampus.oppia.utils.storage.Storage;
 
 import java.io.File;
 import java.util.ArrayList;
 
-public class StartUpActivity extends Activity implements UpgradeListener, PostInstallListener, InstallCourseListener{
+public class StartUpActivity extends Activity implements UpgradeListener, PostInstallListener, InstallCourseListener, PreloadAccountsListener {
 
 	public final static String TAG = StartUpActivity.class.getSimpleName();
 	private TextView tvProgress;
@@ -61,8 +64,20 @@ public class StartUpActivity extends Activity implements UpgradeListener, PostIn
         super.onCreate(savedInstanceState);
         Mint.disableNetworkMonitoring();
         Mint.initAndStartSession(this, MobileLearning.MINT_API_KEY);
-        
         setContentView(R.layout.start_up);
+
+        if (MobileLearning.DEVICEADMIN_ENABLED){
+            boolean isGooglePlayAvailable = GooglePlayUtils.checkPlayServices(this,
+                    new GooglePlayUtils.DialogListener() {
+                        @Override
+                        public void onErrorDialogClosed() {
+                            //If Google play is not available, we need to close the app
+                            StartUpActivity.this.finish();
+                        }
+                    });
+            if (!isGooglePlayAvailable) return;
+        }
+
         tvProgress = (TextView) this.findViewById(R.id.start_up_progress);
         prefs = PreferenceManager.getDefaultSharedPreferences(this);
         String username = SessionManager.getUsername(this);
@@ -73,12 +88,33 @@ public class StartUpActivity extends Activity implements UpgradeListener, PostIn
     public void onResume(){
         super.onResume();
 
+        if (MobileLearning.DEVICEADMIN_ENABLED) {
+            //We need to check again the Google Play API availability
+            boolean isGooglePlayAvailable = GooglePlayUtils.checkPlayServices(this,
+                    new GooglePlayUtils.DialogListener() {
+                        @Override
+                        public void onErrorDialogClosed() {
+                            //If Google play is not available, we need to close the app
+                            StartUpActivity.this.finish();
+                        }
+                    });
+            if (!isGooglePlayAvailable) {
+                this.finish();
+                return;
+            }
+            // Start IntentService to register the phone with GCM.
+            Intent intent = new Intent(this, GCMRegistrationService.class);
+            startService(intent);
+        }
+
         UpgradeManagerTask umt = new UpgradeManagerTask(this);
         umt.setUpgradeListener(this);
         ArrayList<Object> data = new ArrayList<>();
         Payload p = new Payload(data);
         umt.execute(p);
-    }
+ 		
+	}
+	
 	
     private void updateProgress(String text){
     	if(tvProgress != null){
@@ -87,15 +123,12 @@ public class StartUpActivity extends Activity implements UpgradeListener, PostIn
     }
 	
 	private void endStartUpScreen() {
-			
         // launch new activity and close splash screen
-		if (!SessionManager.isLoggedIn(this)) {
-			startActivity(new Intent(StartUpActivity.this, WelcomeActivity.class));
-			finish();
-		} else {
-			startActivity(new Intent(StartUpActivity.this, OppiaMobileActivity.class));
-			finish();
-		}
+        startActivity(new Intent(StartUpActivity.this,
+                SessionManager.isLoggedIn(this)
+                        ? OppiaMobileActivity.class
+                        : WelcomeActivity.class));
+        this.finish();
     }
 
 	private void installCourses(){
@@ -108,9 +141,14 @@ public class StartUpActivity extends Activity implements UpgradeListener, PostIn
 			imTask.setInstallerListener(this);
 			imTask.execute(payload);
 		} else {
-			endStartUpScreen();
+            preloadAccounts();
+
 		}
 	}
+
+    private void preloadAccounts(){
+        SessionManager.preloadUserAccounts(this, this);
+    }
 	
 	public void upgradeComplete(final Payload p) {
 
@@ -171,10 +209,18 @@ public class StartUpActivity extends Activity implements UpgradeListener, PostIn
 		if(p.getResponseData().size()>0){
             prefs.edit().putLong(PrefsActivity.PREF_LAST_MEDIA_SCAN, 0).apply();
 		}
-		endStartUpScreen();	
+		preloadAccounts();
 	}
 
 	public void installProgressUpdate(DownloadProgress dp) {
 		this.updateProgress(dp.getMessage());
 	}
+
+    @Override
+    public void onPreloadAccountsComplete(Payload payload) {
+        if ((payload!=null) && payload.isResult()){
+            Toast.makeText(this, payload.getResultResponse(), Toast.LENGTH_LONG).show();
+        }
+        endStartUpScreen();
+    }
 }
