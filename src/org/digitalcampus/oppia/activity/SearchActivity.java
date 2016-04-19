@@ -18,13 +18,15 @@
 package org.digitalcampus.oppia.activity;
 
 import java.util.ArrayList;
-import org.instrat.oppia.R;
+
 import org.digitalcampus.oppia.adapter.SearchResultsListAdapter;
 import org.digitalcampus.oppia.application.DbHelper;
+import org.digitalcampus.oppia.application.Tracker;
 import org.digitalcampus.oppia.listener.DBListener;
 import org.digitalcampus.oppia.model.Course;
 import org.digitalcampus.oppia.model.SearchResult;
 import org.digitalcampus.oppia.utils.ui.SimpleAnimator;
+import org.instrat.oppia.R;
 
 import android.content.Context;
 import android.content.Intent;
@@ -37,12 +39,12 @@ import android.view.KeyEvent;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
-import android.widget.AdapterView.OnItemClickListener;
 
 public class SearchActivity extends AppActivity {
 
@@ -178,6 +180,10 @@ public class SearchActivity extends AppActivity {
             Log.d(TAG, "Starting search...");
             DbHelper db = DbHelper.getInstance(SearchActivity.this);
             ArrayList<SearchResult> searchResults = db.search(currentSearch, 100, userId, SearchActivity.this, this);
+
+            //Save the search tracker
+            new Tracker(SearchActivity.this)
+                    .saveSearchTracker(currentSearch, searchResults.size());
 
             return searchResults;
         }
